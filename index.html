@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>DJY SaaS</title>
 </head>
 <body>
@@ -18,15 +19,24 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+// 🔥 SUPABASE BAĞLANTI
 const supabaseClient = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
-// EKLE
+// 🔥 ENTER İLE EKLE
+document.getElementById("companyInput")
+  .addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      addCustomer();
+    }
+  });
+
+// ➕ EKLE
 async function addCustomer() {
   const input = document.getElementById("companyInput");
-  const companyName = input.value;
+  const companyName = input.value.trim();
 
   if (!companyName) {
     alert("Şirket adı gir!");
@@ -38,20 +48,24 @@ async function addCustomer() {
     .insert([{ company_name: companyName }]);
 
   if (error) {
-    alert(error.message);
+    alert("Hata: " + error.message);
   } else {
     input.value = "";
     loadCustomers();
   }
 }
 
-// LİSTELE
+// 📋 LİSTELE
 async function loadCustomers() {
   const { data, error } = await supabaseClient
     .from("customers")
-    .select("*");
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  if (error) return;
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
   const list = document.getElementById("customerList");
   list.innerHTML = "";
@@ -62,14 +76,14 @@ async function loadCustomers() {
     li.innerHTML = `
       ${c.company_name}
       <button onclick="deleteCustomer('${c.id}')">❌</button>
-      <button onclick="editCustomer('${c.id}', '${c.company_name}')">✏️</button>
+      <button onclick="editCustomer('${c.id}', \`${c.company_name}\`)">✏️</button>
     `;
 
     list.appendChild(li);
   });
 }
 
-// SİL
+// ❌ SİL
 async function deleteCustomer(id) {
   const confirmDelete = confirm("Silmek istiyor musun?");
   if (!confirmDelete) return;
@@ -86,7 +100,7 @@ async function deleteCustomer(id) {
   }
 }
 
-// GÜNCELLE
+// ✏️ GÜNCELLE
 async function editCustomer(id, oldName) {
   const newName = prompt("Yeni isim gir:", oldName);
   if (!newName) return;
@@ -103,7 +117,9 @@ async function editCustomer(id, oldName) {
   }
 }
 
+// 🚀 SAYFA AÇILINCA YÜKLE
 loadCustomers();
+
 </script>
 
 </body>
