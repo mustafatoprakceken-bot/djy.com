@@ -1,12 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Redirect</title>
-<script>
-window.location.href = "djy_sistem_v3.html";
-</script>
+  <title>DJY SaaS</title>
 </head>
 <body>
+
+<h1>DJY Sistem</h1>
+
+<button onclick="addCustomer()">Test Müşteri Ekle</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://yqzeanpgjeeiepmwdzlt.supabase.co",
+  "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
+);
+
+async function addCustomer(){
+  const { data: userData } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from('customers')
+    .insert([
+      {
+        user_id: userData.user?.id,
+        company_name: "Test Firma"
+      }
+    ]);
+
+  if(error) return alert(error.message);
+  alert("Müşteri kaydedildi!");
+}
+</script>
+
 </body>
 </html>
