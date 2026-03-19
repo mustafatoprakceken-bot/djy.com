@@ -7,12 +7,11 @@
 
 <h1>DJY Sistem</h1>
 
-<button onclick="addCustomer()">Test Müşteri Ekle</button>
+<input type="text" id="companyInput" placeholder="Şirket adı gir" />
+<button onclick="addCustomer()">Müşteri Ekle</button>
 
-<!-- 1️⃣ ÖNCE SUPABASE YÜKLENECEK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2️⃣ SONRA KOD -->
 <script>
 window.onload = function () {
 
@@ -22,10 +21,17 @@ window.onload = function () {
   );
 
   window.addCustomer = async function () {
+    const companyName = document.getElementById("companyInput").value;
+
+    if (!companyName) {
+      alert("Şirket adı gir!");
+      return;
+    }
+
     const { error } = await supabase
       .from('customers')
       .insert([
-        { company_name: "Test Şirket" }
+        { company_name: companyName }
       ]);
 
     if (error) {
