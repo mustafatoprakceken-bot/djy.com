@@ -1,48 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>DJY SaaS</title>
-</head>
-<body>
-
 <h1>DJY Sistem</h1>
 
-<input type="text" id="companyInput" placeholder="Şirket adı gir" />
+<input id="companyInput" placeholder="Şirket adı gir" />
+
 <button onclick="addCustomer()">Müşteri Ekle</button>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-window.onload = function () {
-
-  const supabase = window.supabase.createClient(
-    "https://yqzeanpgjeeiepmwdzlt.supabase.co",
-    "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
-  );
-
-  window.addCustomer = async function () {
-    const companyName = document.getElementById("companyInput").value;
-
-    if (!companyName) {
-      alert("Şirket adı gir!");
-      return;
-    }
-
-    const { error } = await supabase
-      .from('customers')
-      .insert([
-        { company_name: companyName }
-      ]);
-
-    if (error) {
-      alert("Hata: " + error.message);
-    } else {
-      alert("Eklendi!");
-    }
-  }
-
-};
-</script>
-
-</body>
-</html>
