@@ -2,71 +2,75 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>DJY Sistem</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>DJY SaaS</title>
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
+      font-family: Arial;
+      background: linear-gradient(135deg, #1e1e2f, #2b2b45);
       color: white;
     }
 
     .container {
-      padding: 30px;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
     }
 
     h1 {
-      font-size: 28px;
+      font-size: 40px;
       margin-bottom: 20px;
     }
 
     .card {
-      background: #1e293b;
+      background: #2f2f4f;
       padding: 20px;
       border-radius: 12px;
       margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
     input {
       padding: 10px;
       border-radius: 8px;
       border: none;
+      width: 70%;
       margin-right: 10px;
     }
 
     button {
       padding: 10px 15px;
-      border-radius: 8px;
       border: none;
+      border-radius: 8px;
       cursor: pointer;
-      background: #22c55e;
+      background: #4CAF50;
       color: white;
+      font-weight: bold;
     }
 
     button:hover {
-      background: #16a34a;
+      opacity: 0.8;
     }
 
-    .customer-item {
-      background: #334155;
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 10px;
+    .customer {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: #3a3a5c;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
     }
 
     .actions button {
       margin-left: 5px;
-      background: #475569;
+      background: #ff5252;
     }
 
-    .actions button:hover {
-      background: #64748b;
+    .edit {
+      background: #ffc107 !important;
+      color: black;
     }
   </style>
 </head>
@@ -75,7 +79,7 @@
 
 <div class="container">
 
-  <h1>🚀 DJY Yönetim Paneli</h1>
+  <h1>🚀 DJY Sistem</h1>
 
   <div class="card">
     <input id="companyInput" placeholder="Şirket adı gir">
@@ -89,24 +93,24 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const supabaseClient = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
+// EKLE
 async function addCustomer() {
   const input = document.getElementById("companyInput");
-  const companyName = input.value;
+  const name = input.value;
 
-  if (!companyName) {
-    alert("Şirket adı gir!");
-    return;
-  }
+  if (!name) return alert("Şirket adı gir!");
 
   const { error } = await supabaseClient
     .from("customers")
-    .insert([{ company_name: companyName }]);
+    .insert([{ company_name: name }]);
 
   if (error) {
     alert(error.message);
@@ -116,24 +120,23 @@ async function addCustomer() {
   }
 }
 
+// LİSTE
 async function loadCustomers() {
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("customers")
     .select("*");
-
-  if (error) return;
 
   const list = document.getElementById("customerList");
   list.innerHTML = "";
 
   data.forEach(c => {
     const div = document.createElement("div");
-    div.className = "customer-item";
+    div.className = "customer";
 
     div.innerHTML = `
       <span>${c.company_name}</span>
       <div class="actions">
-        <button onclick="editCustomer('${c.id}', '${c.company_name}')">✏️</button>
+        <button class="edit" onclick="editCustomer('${c.id}', '${c.company_name}')">✏️</button>
         <button onclick="deleteCustomer('${c.id}')">❌</button>
       </div>
     `;
@@ -142,11 +145,19 @@ async function loadCustomers() {
   });
 }
 
+// SİL
 async function deleteCustomer(id) {
-  await supabaseClient.from("customers").delete().eq("id", id);
+  if (!confirm("Silinsin mi?")) return;
+
+  await supabaseClient
+    .from("customers")
+    .delete()
+    .eq("id", id);
+
   loadCustomers();
 }
 
+// GÜNCELLE
 async function editCustomer(id, oldName) {
   const newName = prompt("Yeni isim:", oldName);
   if (!newName) return;
