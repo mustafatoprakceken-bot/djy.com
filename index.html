@@ -1,51 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>DJY SaaS</title>
+  <title>DJY Sistem</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+    }
+
+    .container {
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #22c55e;
+      color: white;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+
+    .customer-item {
+      background: #334155;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .actions button {
+      margin-left: 5px;
+      background: #475569;
+    }
+
+    .actions button:hover {
+      background: #64748b;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>DJY Sistem</h1>
+<div class="container">
 
-<input id="companyInput" placeholder="Şirket adı gir">
-<button id="addBtn">Müşteri Ekle</button>
+  <h1>🚀 DJY Yönetim Paneli</h1>
 
-<hr>
+  <div class="card">
+    <input id="companyInput" placeholder="Şirket adı gir">
+    <button onclick="addCustomer()">Ekle</button>
+  </div>
 
-<h2>Müşteriler</h2>
-<ul id="customerList"></ul>
+  <div class="card">
+    <h2>Müşteriler</h2>
+    <div id="customerList"></div>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</div>
 
 <script>
-const client = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
-// BUTON BAĞLAMA (EN ÖNEMLİ KISIM 🔥)
-document.getElementById("addBtn").addEventListener("click", addCustomer);
-
-// ENTER İLE EKLE
-document.getElementById("companyInput")
-  .addEventListener("keypress", function(e) {
-    if (e.key === "Enter") addCustomer();
-  });
-
-// EKLE
 async function addCustomer() {
   const input = document.getElementById("companyInput");
-  const name = input.value.trim();
+  const companyName = input.value;
 
-  if (!name) {
-    alert("Boş olamaz");
+  if (!companyName) {
+    alert("Şirket adı gir!");
     return;
   }
 
-  const { error } = await client
+  const { error } = await supabaseClient
     .from("customers")
-    .insert([{ company_name: name }]);
+    .insert([{ company_name: companyName }]);
 
   if (error) {
     alert(error.message);
@@ -55,64 +116,49 @@ async function addCustomer() {
   }
 }
 
-// LİSTELE
 async function loadCustomers() {
-  const { data, error } = await client
+  const { data, error } = await supabaseClient
     .from("customers")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*");
 
-  if (error) {
-    console.log(error);
-    return;
-  }
+  if (error) return;
 
   const list = document.getElementById("customerList");
   list.innerHTML = "";
 
   data.forEach(c => {
-    const li = document.createElement("li");
+    const div = document.createElement("div");
+    div.className = "customer-item";
 
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.onclick = () => deleteCustomer(c.id);
+    div.innerHTML = `
+      <span>${c.company_name}</span>
+      <div class="actions">
+        <button onclick="editCustomer('${c.id}', '${c.company_name}')">✏️</button>
+        <button onclick="deleteCustomer('${c.id}')">❌</button>
+      </div>
+    `;
 
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "✏️";
-    editBtn.onclick = () => editCustomer(c.id, c.company_name);
-
-    li.textContent = c.company_name + " ";
-    li.appendChild(editBtn);
-    li.appendChild(delBtn);
-
-    list.appendChild(li);
+    list.appendChild(div);
   });
 }
 
-// SİL
 async function deleteCustomer(id) {
-  const { error } = await client
-    .from("customers")
-    .delete()
-    .eq("id", id);
-
-  if (!error) loadCustomers();
+  await supabaseClient.from("customers").delete().eq("id", id);
+  loadCustomers();
 }
 
-// GÜNCELLE
 async function editCustomer(id, oldName) {
   const newName = prompt("Yeni isim:", oldName);
   if (!newName) return;
 
-  const { error } = await client
+  await supabaseClient
     .from("customers")
     .update({ company_name: newName })
     .eq("id", id);
 
-  if (!error) loadCustomers();
+  loadCustomers();
 }
 
-// SAYFA AÇILINCA
 loadCustomers();
 </script>
 
