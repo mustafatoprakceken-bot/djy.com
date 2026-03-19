@@ -1,23 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DJY SaaS</title>
+</head>
+<body>
+
+<h1>DJY Sistem</h1>
+
+<button onclick="addCustomer()">Test Müşteri Ekle</button>
+
+<!-- 1️⃣ ÖNCE SUPABASE YÜKLENECEK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2️⃣ SONRA KOD -->
 <script>
-const supabase = window.supabase.createClient(
-  "https://yqzeanpgjeeiepmwdzlt.supabase.co",
-  "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
-);
+window.onload = function () {
 
-async function addCustomer(){
-  const { error } = await supabase
-    .from('customers')
-    .insert([
-      {
-        company_name: "Webden Geldi",
-        user_id: null
-      }
-    ]);
+  const supabase = window.supabase.createClient(
+    "https://yqzeanpgjeeiepmwdzlt.supabase.co",
+    "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
+  );
 
-  if(error){
-    alert("Hata: " + error.message);
-  } else {
-    alert("Eklendi!");
+  window.addCustomer = async function () {
+    const { error } = await supabase
+      .from('customers')
+      .insert([
+        { company_name: "Test Şirket" }
+      ]);
+
+    if (error) {
+      alert("Hata: " + error.message);
+    } else {
+      alert("Eklendi!");
+    }
   }
-}
+
+};
 </script>
+
+</body>
+</html>
