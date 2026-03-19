@@ -1,94 +1,94 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>DJY SaaS</title>
-
   <style>
     body {
       margin: 0;
       font-family: Arial;
-      background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+      background: #0f172a;
+      color: white;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #020617;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .sidebar h2 {
+      color: #22c55e;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #94a3b8;
+      margin: 10px 0;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover {
       color: white;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 50px auto;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 40px;
-      margin-bottom: 20px;
+    .main {
+      flex: 1;
+      padding: 30px;
     }
 
     .card {
-      background: #2f2f4f;
+      background: #1e293b;
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 10px;
       margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
     input {
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       border: none;
-      width: 70%;
       margin-right: 10px;
     }
 
     button {
       padding: 10px 15px;
+      background: #22c55e;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #4CAF50;
-      color: white;
-      font-weight: bold;
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    .customer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #3a3a5c;
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-
-    .actions button {
-      margin-left: 5px;
-      background: #ff5252;
-    }
-
-    .edit {
-      background: #ffc107 !important;
+      border-radius: 6px;
       color: black;
+      cursor: pointer;
+    }
+
+    li {
+      margin: 10px 0;
     }
   </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="sidebar">
+  <h2>🚀 DJY</h2>
+  <a href="#">Dashboard</a>
+  <a href="#">Müşteriler</a>
+  <a href="#">Ayarlar</a>
+</div>
 
-  <h1>🚀 DJY Sistem</h1>
+<div class="main">
+
+  <h1>Dashboard</h1>
 
   <div class="card">
+    <h3>Müşteri Ekle</h3>
     <input id="companyInput" placeholder="Şirket adı gir">
     <button onclick="addCustomer()">Ekle</button>
   </div>
 
   <div class="card">
-    <h2>Müşteriler</h2>
-    <div id="customerList"></div>
+    <h3>Müşteriler</h3>
+    <ul id="customerList"></ul>
   </div>
 
 </div>
@@ -101,26 +101,20 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
-// EKLE
 async function addCustomer() {
   const input = document.getElementById("companyInput");
-  const name = input.value;
+  const companyName = input.value;
 
-  if (!name) return alert("Şirket adı gir!");
+  if (!companyName) return;
 
-  const { error } = await supabaseClient
-    .from("customers")
-    .insert([{ company_name: name }]);
+  await supabaseClient.from("customers").insert([
+    { company_name: companyName }
+  ]);
 
-  if (error) {
-    alert(error.message);
-  } else {
-    input.value = "";
-    loadCustomers();
-  }
+  input.value = "";
+  loadCustomers();
 }
 
-// LİSTE
 async function loadCustomers() {
   const { data } = await supabaseClient
     .from("customers")
@@ -130,41 +124,19 @@ async function loadCustomers() {
   list.innerHTML = "";
 
   data.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "customer";
-
-    div.innerHTML = `
-      <span>${c.company_name}</span>
-      <div class="actions">
-        <button class="edit" onclick="editCustomer('${c.id}', '${c.company_name}')">✏️</button>
-        <button onclick="deleteCustomer('${c.id}')">❌</button>
-      </div>
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${c.company_name}
+      <button onclick="deleteCustomer('${c.id}')">❌</button>
     `;
-
-    list.appendChild(div);
+    list.appendChild(li);
   });
 }
 
-// SİL
 async function deleteCustomer(id) {
-  if (!confirm("Silinsin mi?")) return;
-
   await supabaseClient
     .from("customers")
     .delete()
-    .eq("id", id);
-
-  loadCustomers();
-}
-
-// GÜNCELLE
-async function editCustomer(id, oldName) {
-  const newName = prompt("Yeni isim:", oldName);
-  if (!newName) return;
-
-  await supabaseClient
-    .from("customers")
-    .update({ company_name: newName })
     .eq("id", id);
 
   loadCustomers();
