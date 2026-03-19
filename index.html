@@ -9,7 +9,7 @@
 <h1>DJY Sistem</h1>
 
 <input id="companyInput" placeholder="Şirket adı gir">
-<button id="addBtn">Ekle</button>
+<button id="addBtn">Müşteri Ekle</button>
 
 <hr>
 
@@ -24,9 +24,16 @@ const client = window.supabase.createClient(
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
-// BUTON EVENT (onclick KALDIRDIK)
+// BUTON BAĞLAMA (EN ÖNEMLİ KISIM 🔥)
 document.getElementById("addBtn").addEventListener("click", addCustomer);
 
+// ENTER İLE EKLE
+document.getElementById("companyInput")
+  .addEventListener("keypress", function(e) {
+    if (e.key === "Enter") addCustomer();
+  });
+
+// EKLE
 async function addCustomer() {
   const input = document.getElementById("companyInput");
   const name = input.value.trim();
@@ -48,6 +55,7 @@ async function addCustomer() {
   }
 }
 
+// LİSTELE
 async function loadCustomers() {
   const { data, error } = await client
     .from("customers")
@@ -81,6 +89,7 @@ async function loadCustomers() {
   });
 }
 
+// SİL
 async function deleteCustomer(id) {
   const { error } = await client
     .from("customers")
@@ -90,6 +99,7 @@ async function deleteCustomer(id) {
   if (!error) loadCustomers();
 }
 
+// GÜNCELLE
 async function editCustomer(id, oldName) {
   const newName = prompt("Yeni isim:", oldName);
   if (!newName) return;
@@ -102,6 +112,7 @@ async function editCustomer(id, oldName) {
   if (!error) loadCustomers();
 }
 
+// SAYFA AÇILINCA
 loadCustomers();
 </script>
 
