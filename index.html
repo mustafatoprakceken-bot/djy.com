@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
   <title>DJY SaaS</title>
@@ -19,7 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
@@ -32,11 +31,9 @@ async function addCustomer() {
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("customers")
-    .insert([
-      { company_name: companyName }
-    ]);
+    .insert([{ company_name: companyName }]);
 
   if (error) {
     alert("Hata: " + error.message);
@@ -47,7 +44,7 @@ async function addCustomer() {
 }
 
 async function loadCustomers() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("customers")
     .select("*");
 
