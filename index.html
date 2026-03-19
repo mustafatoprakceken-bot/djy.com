@@ -8,8 +8,8 @@
 
 <h1>DJY Sistem</h1>
 
-<input id="companyInput" placeholder="Şirket adı gir" />
-<button onclick="addCustomer()">Ekle</button>
+<input id="companyInput" placeholder="Şirket adı gir">
+<button id="addBtn">Ekle</button>
 
 <hr>
 
@@ -19,51 +19,43 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// 🔥 SUPABASE BAĞLANTI
-const supabaseClient = window.supabase.createClient(
+const client = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
-// 🔥 ENTER İLE EKLE
-document.getElementById("companyInput")
-  .addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      addCustomer();
-    }
-  });
+// BUTON EVENT (onclick KALDIRDIK)
+document.getElementById("addBtn").addEventListener("click", addCustomer);
 
-// ➕ EKLE
 async function addCustomer() {
   const input = document.getElementById("companyInput");
-  const companyName = input.value.trim();
+  const name = input.value.trim();
 
-  if (!companyName) {
-    alert("Şirket adı gir!");
+  if (!name) {
+    alert("Boş olamaz");
     return;
   }
 
-  const { error } = await supabaseClient
+  const { error } = await client
     .from("customers")
-    .insert([{ company_name: companyName }]);
+    .insert([{ company_name: name }]);
 
   if (error) {
-    alert("Hata: " + error.message);
+    alert(error.message);
   } else {
     input.value = "";
     loadCustomers();
   }
 }
 
-// 📋 LİSTELE
 async function loadCustomers() {
-  const { data, error } = await supabaseClient
+  const { data, error } = await client
     .from("customers")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-    alert(error.message);
+    console.log(error);
     return;
   }
 
@@ -73,53 +65,44 @@ async function loadCustomers() {
   data.forEach(c => {
     const li = document.createElement("li");
 
-    li.innerHTML = `
-      ${c.company_name}
-      <button onclick="deleteCustomer('${c.id}')">❌</button>
-      <button onclick="editCustomer('${c.id}', \`${c.company_name}\`)">✏️</button>
-    `;
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌";
+    delBtn.onclick = () => deleteCustomer(c.id);
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️";
+    editBtn.onclick = () => editCustomer(c.id, c.company_name);
+
+    li.textContent = c.company_name + " ";
+    li.appendChild(editBtn);
+    li.appendChild(delBtn);
 
     list.appendChild(li);
   });
 }
 
-// ❌ SİL
 async function deleteCustomer(id) {
-  const confirmDelete = confirm("Silmek istiyor musun?");
-  if (!confirmDelete) return;
-
-  const { error } = await supabaseClient
+  const { error } = await client
     .from("customers")
     .delete()
     .eq("id", id);
 
-  if (error) {
-    alert(error.message);
-  } else {
-    loadCustomers();
-  }
+  if (!error) loadCustomers();
 }
 
-// ✏️ GÜNCELLE
 async function editCustomer(id, oldName) {
-  const newName = prompt("Yeni isim gir:", oldName);
+  const newName = prompt("Yeni isim:", oldName);
   if (!newName) return;
 
-  const { error } = await supabaseClient
+  const { error } = await client
     .from("customers")
     .update({ company_name: newName })
     .eq("id", id);
 
-  if (error) {
-    alert(error.message);
-  } else {
-    loadCustomers();
-  }
+  if (!error) loadCustomers();
 }
 
-// 🚀 SAYFA AÇILINCA YÜKLE
 loadCustomers();
-
 </script>
 
 </body>
