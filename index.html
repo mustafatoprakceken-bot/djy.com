@@ -8,7 +8,7 @@
 <h1>DJY Sistem</h1>
 
 <input id="companyInput" placeholder="Şirket adı gir" />
-<button onclick="addCustomer()">Müşteri Ekle</button>
+<button onclick="addCustomer()">Ekle</button>
 
 <hr>
 
@@ -23,8 +23,10 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
+// EKLE
 async function addCustomer() {
-  const companyName = document.getElementById("companyInput").value;
+  const input = document.getElementById("companyInput");
+  const companyName = input.value;
 
   if (!companyName) {
     alert("Şirket adı gir!");
@@ -36,13 +38,14 @@ async function addCustomer() {
     .insert([{ company_name: companyName }]);
 
   if (error) {
-    alert("Hata: " + error.message);
+    alert(error.message);
   } else {
-    alert("Eklendi!");
+    input.value = "";
     loadCustomers();
   }
 }
 
+// LİSTELE
 async function loadCustomers() {
   const { data, error } = await supabaseClient
     .from("customers")
@@ -55,9 +58,49 @@ async function loadCustomers() {
 
   data.forEach(c => {
     const li = document.createElement("li");
-    li.textContent = c.company_name;
+
+    li.innerHTML = `
+      ${c.company_name}
+      <button onclick="deleteCustomer('${c.id}')">❌</button>
+      <button onclick="editCustomer('${c.id}', '${c.company_name}')">✏️</button>
+    `;
+
     list.appendChild(li);
   });
+}
+
+// SİL
+async function deleteCustomer(id) {
+  const confirmDelete = confirm("Silmek istiyor musun?");
+  if (!confirmDelete) return;
+
+  const { error } = await supabaseClient
+    .from("customers")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+  } else {
+    loadCustomers();
+  }
+}
+
+// GÜNCELLE
+async function editCustomer(id, oldName) {
+  const newName = prompt("Yeni isim gir:", oldName);
+  if (!newName) return;
+
+  const { error } = await supabaseClient
+    .from("customers")
+    .update({ company_name: newName })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+  } else {
+    loadCustomers();
+  }
 }
 
 loadCustomers();
