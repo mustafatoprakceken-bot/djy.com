@@ -51,7 +51,6 @@
 
 <body>
 
-<!-- LOGIN -->
 <div id="login" class="card">
   <h2>Giriş Yap</h2>
   <input id="email" placeholder="Email">
@@ -60,7 +59,6 @@
   <button onclick="register()">Kayıt Ol</button>
 </div>
 
-<!-- APP -->
 <div id="app" class="app">
   <h1>DJY Dashboard</h1>
 
@@ -92,7 +90,10 @@ async function login() {
     password
   });
 
-  if (error) return alert(error.message);
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
   user = data.user;
   showApp();
@@ -108,9 +109,12 @@ async function register() {
     password
   });
 
-  if (error) return alert(error.message);
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
-  alert("Kayıt başarılı! Şimdi giriş yap");
+  alert("Kayıt başarılı!");
 }
 
 // LOGOUT
@@ -126,29 +130,47 @@ function showApp() {
   loadCustomers();
 }
 
-// EKLE (user_id ile 🔥)
+// EKLE
 async function addCustomer() {
+  if (!user) {
+    alert("Giriş yapmadan ekleyemezsin");
+    return;
+  }
+
   const name = document.getElementById("companyInput").value;
 
-  if (!name) return alert("Şirket adı gir");
+  if (!name) {
+    alert("Şirket adı gir");
+    return;
+  }
 
-  await supabase.from("customers").insert([
+  const { error } = await supabase.from("customers").insert([
     {
       company_name: name,
       user_id: user.id
     }
   ]);
 
+  if (error) {
+    alert("HATA: " + error.message);
+    return;
+  }
+
   document.getElementById("companyInput").value = "";
   loadCustomers();
 }
 
-// SADECE KENDİ VERİNİ ÇEK 🔥
+// LİSTE
 async function loadCustomers() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("customers")
     .select("*")
     .eq("user_id", user.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
   const list = document.getElementById("customerList");
   list.innerHTML = "";
@@ -160,7 +182,7 @@ async function loadCustomers() {
   });
 }
 
-// SESSION CHECK
+// SESSION
 supabase.auth.getSession().then(({ data }) => {
   if (data.session) {
     user = data.session.user;
