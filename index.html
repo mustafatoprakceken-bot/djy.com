@@ -1,4 +1,3 @@
-console.log("JS ÇALIŞTI");
 <!DOCTYPE html>
 <html>
 <head>
@@ -72,9 +71,13 @@ console.log("JS ÇALIŞTI");
   <button onclick="logout()">Çıkış</button>
 </div>
 
+<!-- ✅ DOĞRU CDN -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
+console.log("JS YÜKLENDİ");
+
+// 🔗 SUPABASE
 const supabase = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
@@ -82,7 +85,7 @@ const supabase = window.supabase.createClient(
 
 let user = null;
 
-// REGISTER
+// ✅ REGISTER
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -92,17 +95,17 @@ async function register() {
     password
   });
 
-  console.log(data, error);
+  console.log("REGISTER:", data, error);
 
   if (error) {
     alert(error.message);
     return;
   }
 
-  alert("Kayıt başarılı! Şimdi giriş yap.");
+  alert("Kayıt başarılı! Giriş yapabilirsin.");
 }
 
-// LOGIN
+// ✅ LOGIN
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -112,7 +115,7 @@ async function login() {
     password
   });
 
-  console.log(data, error);
+  console.log("LOGIN:", data, error);
 
   if (error) {
     alert(error.message);
@@ -128,20 +131,20 @@ async function login() {
   showApp();
 }
 
-// LOGOUT
+// ✅ LOGOUT
 async function logout() {
   await supabase.auth.signOut();
   location.reload();
 }
 
-// APP GÖSTER
+// ✅ APP GÖSTER
 function showApp() {
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
   loadCustomers();
 }
 
-// EKLE
+// ✅ EKLE
 async function addCustomer() {
   if (!user) {
     alert("Giriş yapmadan ekleyemezsin");
@@ -171,7 +174,7 @@ async function addCustomer() {
   loadCustomers();
 }
 
-// LİSTE
+// ✅ LİSTE
 async function loadCustomers() {
   if (!user) return;
 
@@ -195,7 +198,7 @@ async function loadCustomers() {
   });
 }
 
-// SESSION
+// ✅ SESSION KONTROL
 supabase.auth.getSession().then(({ data }) => {
   if (data.session) {
     user = data.session.user;
