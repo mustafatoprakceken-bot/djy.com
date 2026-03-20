@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>DJY SaaS</title>
+
   <style>
     body {
       margin: 0;
@@ -9,140 +11,159 @@
       background: #0f172a;
       color: white;
       display: flex;
-    }
-
-    .sidebar {
-      width: 220px;
-      background: #020617;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
-      padding: 20px;
-    }
-
-    .sidebar h2 {
-      color: #22c55e;
-    }
-
-    .sidebar a {
-      display: block;
-      color: #94a3b8;
-      margin: 10px 0;
-      text-decoration: none;
-    }
-
-    .sidebar a:hover {
-      color: white;
-    }
-
-    .main {
-      flex: 1;
-      padding: 30px;
     }
 
     .card {
       background: #1e293b;
-      padding: 20px;
+      padding: 30px;
       border-radius: 10px;
-      margin-bottom: 20px;
+      width: 300px;
     }
 
     input {
+      width: 100%;
       padding: 10px;
+      margin: 10px 0;
       border-radius: 6px;
       border: none;
-      margin-right: 10px;
     }
 
     button {
-      padding: 10px 15px;
+      width: 100%;
+      padding: 10px;
       background: #22c55e;
       border: none;
       border-radius: 6px;
-      color: black;
       cursor: pointer;
     }
 
-    li {
-      margin: 10px 0;
+    .app {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-  <h2>🚀 DJY</h2>
-  <a href="#">Dashboard</a>
-  <a href="#">Müşteriler</a>
-  <a href="#">Ayarlar</a>
+<!-- LOGIN -->
+<div id="login" class="card">
+  <h2>Giriş Yap</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Şifre">
+  <button onclick="login()">Giriş</button>
+  <button onclick="register()">Kayıt Ol</button>
 </div>
 
-<div class="main">
+<!-- APP -->
+<div id="app" class="app">
+  <h1>DJY Dashboard</h1>
 
-  <h1>Dashboard</h1>
+  <input id="companyInput" placeholder="Şirket adı gir">
+  <button onclick="addCustomer()">Ekle</button>
 
-  <div class="card">
-    <h3>Müşteri Ekle</h3>
-    <input id="companyInput" placeholder="Şirket adı gir">
-    <button onclick="addCustomer()">Ekle</button>
-  </div>
+  <ul id="customerList"></ul>
 
-  <div class="card">
-    <h3>Müşteriler</h3>
-    <ul id="customerList"></ul>
-  </div>
-
+  <button onclick="logout()">Çıkış</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseClient = window.supabase.createClient(
+const supabase = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
 );
 
-async function addCustomer() {
-  const input = document.getElementById("companyInput");
-  const companyName = input.value;
+let user = null;
 
-  if (!companyName) return;
+// LOGIN
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  await supabaseClient.from("customers").insert([
-    { company_name: companyName }
-  ]);
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
-  input.value = "";
+  if (error) return alert(error.message);
+
+  user = data.user;
+  showApp();
+}
+
+// REGISTER
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) return alert(error.message);
+
+  alert("Kayıt başarılı! Şimdi giriş yap");
+}
+
+// LOGOUT
+async function logout() {
+  await supabase.auth.signOut();
+  location.reload();
+}
+
+// APP GÖSTER
+function showApp() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
   loadCustomers();
 }
 
+// EKLE (user_id ile 🔥)
+async function addCustomer() {
+  const name = document.getElementById("companyInput").value;
+
+  await supabase.from("customers").insert([
+    {
+      company_name: name,
+      user_id: user.id
+    }
+  ]);
+
+  loadCustomers();
+}
+
+// SADECE KENDİ VERİNİ ÇEK 🔥
 async function loadCustomers() {
-  const { data } = await supabaseClient
+  const { data } = await supabase
     .from("customers")
-    .select("*");
+    .select("*")
+    .eq("user_id", user.id);
 
   const list = document.getElementById("customerList");
   list.innerHTML = "";
 
   data.forEach(c => {
     const li = document.createElement("li");
-    li.innerHTML = `
-      ${c.company_name}
-      <button onclick="deleteCustomer('${c.id}')">❌</button>
-    `;
+    li.textContent = c.company_name;
     list.appendChild(li);
   });
 }
 
-async function deleteCustomer(id) {
-  await supabaseClient
-    .from("customers")
-    .delete()
-    .eq("id", id);
-
-  loadCustomers();
-}
-
-loadCustomers();
+// SESSION CHECK
+supabase.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    user = data.session.user;
+    showApp();
+  }
+});
 </script>
 
 </body>
