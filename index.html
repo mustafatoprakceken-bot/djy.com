@@ -1,4 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DJY SaaS</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #22c55e;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .app {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="card">
+  <h2>Giriş Yap</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Şifre">
+  <button onclick="login()">Giriş</button>
+  <button onclick="register()">Kayıt Ol</button>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <h1>DJY Dashboard</h1>
+
+  <input id="companyInput" placeholder="Şirket adı gir">
+  <button onclick="addCustomer()">Ekle</button>
+
+  <ul id="customerList"></ul>
+
+  <button onclick="logout()">Çıkış</button>
+</div>
+
+<!-- ✅ DOĞRU CDN -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
 <script>
+if (!window.supabase) {
+  alert("Supabase yüklenmedi!");
+}
+
+// 🔥 CLIENT
 const supabase = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
   "sb_publishable_T2jW1Iw2cuhun9qVB9UnrQ_M4-VI93X"
@@ -25,7 +107,7 @@ async function login() {
   showApp();
 }
 
-// REGISTER 🔥 FIXED
+// REGISTER
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -43,7 +125,7 @@ async function register() {
     return;
   }
 
-  alert("Kayıt başarılı! (Eğer mail gelmezse Users panelinden giriş aç)");
+  alert("Kayıt başarılı! (Mail gelmezse Users panelden aç)");
 }
 
 // LOGOUT
@@ -52,7 +134,7 @@ async function logout() {
   location.reload();
 }
 
-// APP
+// APP GÖSTER
 function showApp() {
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
@@ -97,7 +179,7 @@ async function loadCustomers() {
     .eq("user_id", user.id);
 
   if (error) {
-    alert(error.message);
+    alert("Liste hatası: " + error.message);
     return;
   }
 
@@ -111,7 +193,7 @@ async function loadCustomers() {
   });
 }
 
-// SESSION
+// SESSION CHECK
 supabase.auth.getSession().then(({ data }) => {
   if (data.session) {
     user = data.session.user;
@@ -119,3 +201,6 @@ supabase.auth.getSession().then(({ data }) => {
   }
 });
 </script>
+
+</body>
+</html>
