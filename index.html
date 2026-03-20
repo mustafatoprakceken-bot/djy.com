@@ -1,77 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>DJY SaaS</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .card {
-      background: #1e293b;
-      padding: 30px;
-      border-radius: 10px;
-      width: 300px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #22c55e;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .app {
-      display: none;
-      width: 100%;
-      height: 100vh;
-      padding: 20px;
-    }
-  </style>
-</head>
-
-<body>
-
-<div id="login" class="card">
-  <h2>Giriş Yap</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Şifre">
-  <button onclick="login()">Giriş</button>
-  <button onclick="register()">Kayıt Ol</button>
-</div>
-
-<div id="app" class="app">
-  <h1>DJY Dashboard</h1>
-
-  <input id="companyInput" placeholder="Şirket adı gir">
-  <button onclick="addCustomer()">Ekle</button>
-
-  <ul id="customerList"></ul>
-
-  <button onclick="logout()">Çıkış</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const supabase = window.supabase.createClient(
   "https://yqzeanpgjeeiepmwdzlt.supabase.co",
@@ -91,7 +17,7 @@ async function login() {
   });
 
   if (error) {
-    alert(error.message);
+    alert("Giriş hatası: " + error.message);
     return;
   }
 
@@ -99,22 +25,25 @@ async function login() {
   showApp();
 }
 
-// REGISTER
+// REGISTER 🔥 FIXED
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
-    password
+    password,
+    options: {
+      emailRedirectTo: window.location.origin
+    }
   });
 
   if (error) {
-    alert(error.message);
+    alert("Kayıt hatası: " + error.message);
     return;
   }
 
-  alert("Kayıt başarılı!");
+  alert("Kayıt başarılı! (Eğer mail gelmezse Users panelinden giriş aç)");
 }
 
 // LOGOUT
@@ -123,7 +52,7 @@ async function logout() {
   location.reload();
 }
 
-// APP GÖSTER
+// APP
 function showApp() {
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
@@ -133,7 +62,7 @@ function showApp() {
 // EKLE
 async function addCustomer() {
   if (!user) {
-    alert("Giriş yapmadan ekleyemezsin");
+    alert("Önce giriş yap");
     return;
   }
 
@@ -190,6 +119,3 @@ supabase.auth.getSession().then(({ data }) => {
   }
 });
 </script>
-
-</body>
-</html>
